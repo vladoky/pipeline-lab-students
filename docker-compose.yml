@@ -38,11 +38,13 @@ services:
       - "8082:8082"   # веб-интерфейс (router)
     volumes:
       - artifactory_data:/var/opt/jfrog/artifactory
-      # Ключи кластера: без них JCR падает при первом запуске
-      # (Missing MasterKey/JoinKey). Сгенерированы заранее
-      # (openssl rand -hex 32), только для лабораторного стенда!
+      # Ключ кластера: без него JCR падает при первом запуске
+      # (Missing MasterKey). Сгенерирован заранее (openssl rand -hex 32),
+      # только для лабораторного стенда!
+      # join.key НЕ монтируем: access-сервис генерирует и перезаписывает
+      # его сам; примонтированный файл он перезаписать не сможет
+      # (AccessDeniedException).
       - ./jcr-keys/master.key:/opt/jfrog/artifactory/var/etc/security/master.key
-      - ./jcr-keys/join.key:/opt/jfrog/artifactory/var/etc/security/join.key
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8082/router/api/v1/system/health"]
